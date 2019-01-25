@@ -2,14 +2,14 @@
  * @Author: guofeng 
  * @Date: 2019-01-22 16:37:11 
  * @Last Modified by: guofeng
- * @Last Modified time: 2019-01-22 18:52:43
+ * @Last Modified time: 2019-01-23 18:55:34
  */
 var net = require("net");
 
 var log = require("./../utils/logs");
 var tcppkg = require("./tcppkg");
 
-var newtbus = {
+var netbus = {
     PROTO_JSON: 1,
     PROTO_BUF: 2,
 }
@@ -49,7 +49,7 @@ function on_session_exit(session) {
     log.info("session  exit !!!");
     session.last_pkg = null;
     if (global_session_list[session.session_key]) {
-        global_session_list[session.session_key] = null;                                                                                                                                                           ]
+        global_session_list[session.session_key] = null;                                                                                                                                 
         delete global_session_list[session.session_key];
         session.session_key = null;
     }
@@ -128,6 +128,7 @@ function add_client_session_event(session, proto_type, is_ws){
  * @proto_type 传输类型
  */
 function start_tcp_server (ip, port, proto_type) {
+    log.info("start server", ip, port, proto_type)
     var server = net.createServer(function(client_sock) { 
         add_client_session_event(client_sock, proto_type)
     });
@@ -139,6 +140,12 @@ function start_tcp_server (ip, port, proto_type) {
     server.on("close", function() {
          log.error("listen server close")
     });
-}
 
-module.exports = newtbus;
+    server.listen({
+        port: port,
+        ip: ip,
+        exclusive: true
+    })
+}
+netbus.start_tcp_server = start_tcp_server;
+module.exports = netbus;
